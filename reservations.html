@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primo Taglio Pizzeria | Reservations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@100;300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #0a0b0c; 
+            --bg-card: #111215;
+            --gold: #d4af37;
+            --gold-muted: #aa8c30;
+            --gold-glow: rgba(212, 175, 55, 0.08);
+            --text-light: #f5f5f7;
+            --text-muted: #8e8e93;
+            --font-display: 'Cinzel', serif;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-sans: 'Montserrat', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-dark);
+            background: linear-gradient(rgba(10, 11, 12, 0.94), rgba(10, 11, 12, 0.96)), 
+                        url('https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?q=80&w=2000&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: var(--text-light);
+            padding-top: 180px;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- SCROLL ANIMATION CORE --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-1 { transition-delay: 0.2s; }
+
+        /* --- NAVIGATION --- */
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 6%;
+            background: linear-gradient(to bottom, #0a0b0c 70%, transparent);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .nav-links { list-style: none; display: flex; gap: 40px; flex: 1; }
+        .nav-links a {
+            color: var(--text-muted); text-decoration: none; font-size: 0.65rem;
+            text-transform: uppercase; letter-spacing: 4px; font-weight: 400;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+        
+        .logo { 
+            font-family: var(--font-display); 
+            font-size: 2.5rem; 
+            color: #fff; 
+            text-decoration: none; 
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            letter-spacing: 1px;
+        }
+
+        .nav-right { flex: 1; display: flex; justify-content: flex-end; }
+
+        /* --- CONTENT WRAPPER --- */
+        .reservation-wrapper { 
+            max-width: 650px; 
+            width: 100%;
+            margin: 0 auto auto auto; 
+            padding: 0 4% 100px 4%; 
+        }
+        
+        .page-title { text-align: center; margin-bottom: 50px; position: relative; }
+        .page-title::before {
+            content: ""; position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            width: 1px; height: 50px; background: linear-gradient(to bottom, transparent, var(--gold));
+        }
+        .page-title h1 { 
+            font-family: var(--font-display); 
+            font-size: 3rem; 
+            font-weight: 400; 
+            color: #fff; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+            letter-spacing: 6px; 
+        }
+        .page-subtitle {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* --- RESERVATION FORM --- */
+        .res-form {
+            background: linear-gradient(145deg, rgba(25, 26, 30, 0.85) 0%, rgba(13, 14, 16, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 45px;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
+
+        label {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            background: rgba(10, 11, 12, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 300;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--gold-muted);
+            box-shadow: 0 0 10px rgba(214, 175, 55, 0.1);
+        }
+
+        input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        /* --- ACTION BUTTON --- */
+        .submit-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 16px 0;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--gold);
+            color: var(--bg-dark);
+            box-shadow: 0 0 25px rgba(214, 175, 55, 0.2);
+        }
+
+        /* --- IMPORTANT NOTE --- */
+        .form-note {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px dotted rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+        .form-note p {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* --- FOOTER --- */
+        footer { 
+            background-color: #050607; 
+            padding: 40px 5%; 
+            text-align: center; 
+            font-size: 0.65rem; 
+            color: #444; 
+            letter-spacing: 3px; 
+            text-transform: uppercase;
+            margin-top: auto;
+        }
+
+        @media(max-width: 900px) {
+            body { padding-top: 140px; }
+            header { padding: 20px 4%; }
+            .logo { position: relative; left: 0; transform: none; font-size: 2.5rem; }
+            .nav-right { display: none; }
+            .page-title h1 { font-size: 2.2rem; }
+            .res-form { padding: 30px 20px; }
+            .form-row { grid-template-columns: 1fr; gap: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">The Menu</a></li>
+        </ul>
+        <a href="index.html" class="logo">P.</a>
+        <div class="nav-right"></div>
+    </header>
+
+    <div class="reservation-wrapper">
+        <div class="page-title reveal">
+            <h1>Prenotazioni</h1>
+            <div class="page-subtitle">Secure your table at the square center</div>
+        </div>
+
+        <!-- RESERVATION FORM -->
+        <form class="res-form reveal delay-1" action="#" method="POST">
+            
+            <div class="form-group">
+                <label for="full-name">Full Name</label>
+                <input type="text" id="full-name" name="name" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email-address">Email Address</label>
+                    <input type="email" id="email-address" name="email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone-number">Phone Number</label>
+                    <input type="tel" id="phone-number" name="phone" placeholder="(555) 000-0000" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="res-date">Date</label>
+                    <input type="date" id="res-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-time">Time</label>
+                    <select id="res-time" name="time" required>
+                        <option value="" disabled selected>Select a time</option>
+                        <option value="5:00 PM">5:00 PM</option>
+                        <option value="5:30 PM">5:30 PM</option>
+                        <option value="6:00 PM">6:00 PM</option>
+                        <option value="6:30 PM">6:30 PM</option>
+                        <option value="7:00 PM">7:00 PM</option>
+                        <option value="7:30 PM">7:30 PM</option>
+                        <option value="8:00 PM">8:00 PM</option>
+                        <option value="8:30 PM">8:30 PM</option>
+                        <option value="9:00 PM">9:00 PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="guests">Number of Guests</label>
+                <select id="guests" name="guests" required>
+                    <option value="1">1 Guest</option>
+                    <option value="2" selected>2 Guests</option>
+                    <option value="3">3 Guests</option>
+                    <option value="4">4 Guests</option>
+                    <option value="5">5 Guests</option>
+                    <option value="6">6+ Guests (Family Sheet)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Request Table Placement</button>
+
+            <div class="form-note">
+                <p>Please note: Submission requests act as priority place-holders. Our hosts will finalize and verify your dinner slot via text message or email within 15 minutes of booking.</p>
+            </div>
+
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Primo Taglio Pizzeria. All Rights Reserved.</p>
+    </footer>
+
+    <!-- SCROLL ENGINE SCRIPT -->
+    <script>
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+</body>
+</html>
